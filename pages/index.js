@@ -3,12 +3,12 @@ import sys
 import requests
 
 def get_bard_session():
-    """
+    
     Gets the Bard session cookie.
 
     Returns:
         The Bard session cookie.
-    """
+    
 
     session = requests.Session()
     url = "https://bard.google.com/"
@@ -21,7 +21,7 @@ def get_bard_session():
     return session_cookie
 
 def ask_bard(session, question):
-    """
+    
     Asks Bard a question.
 
     Args:
@@ -30,7 +30,7 @@ def ask_bard(session, question):
 
     Returns:
         Bard's answer to the question.
-    """
+    
 
     url = "https://bard.google.com/api/v1/query"
     headers = {
@@ -49,9 +49,9 @@ def ask_bard(session, question):
     return answer
 
 def main():
-    """
+    
     The main function.
-    """
+    
 
     session_cookie = get_bard_session()
     question = input("What would you like to ask Bard? ")
