@@ -1,58 +1,63 @@
-import Head from "next/head";
-import { useState } from "react";
-import styles from "./index.module.css";
+import os
+import sys
+import requests
 
-export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
-  const [result, setResult] = useState();
+def get_bard_session():
+    """
+    Gets the Bard session cookie.
 
-  async function onSubmit(event) {
-    event.preventDefault();
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ animal: animalInput }),
-      });
+    Returns:
+        The Bard session cookie.
+    """
 
-      const data = await response.json();
-      if (response.status !== 200) {
-        throw data.error || new Error(`Request failed with status ${response.status}`);
-      }
+    session = requests.Session()
+    url = "https://bard.google.com/"
+    response = session.get(url)
 
-      setResult(data.result);
-      setAnimalInput("");
-    } catch(error) {
-      // Consider implementing your own error handling logic here
-      console.error(error);
-      alert(error.message);
+    if response.status_code != 200:
+        raise Exception("Could not get Bard session cookie.")
+
+    session_cookie = response.cookies["__Secure-1PSID"]
+    return session_cookie
+
+def ask_bard(session, question):
+    """
+    Asks Bard a question.
+
+    Args:
+        session: The Bard session cookie.
+        question: The question to ask Bard.
+
+    Returns:
+        Bard's answer to the question.
+    """
+
+    url = "https://bard.google.com/api/v1/query"
+    headers = {
+        "Authorization": "Bearer \{\}".format(session_cookie),
+        "Content-Type": "application/json",
     }
-  }
+    data = {
+        "question": question,
+    }
+    response = requests.post(url, headers=headers, data=data)
 
-  return (
-    <div>
-      <Head>
-        <title>OpenAI Quickstart</title>
-        <link rel="icon" href="/dog.png" />
-      </Head>
+    if response.status_code != 200:
+        raise Exception("Could not ask Bard a question.")
 
-      <main className={styles.main}>
-        <img src="/dog.png" className={styles.icon} />
-        <h3>Name my pet</h3>
-        <form onSubmit={onSubmit}>
-          <input
-            type="text"
-            name="animal"
-            placeholder="Enter an animal"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
-          />
-          <input type="submit" value="Generate names" />
-        </form>
-        <div className={styles.result}>{result}</div>
-      </main>
-    </div>
-  );
+    answer = response.json()["answer"]
+    return answer
+
+def main():
+    """
+    The main function.
+    """
+
+    session_cookie = get_bard_session()
+    question = input("What would you like to ask Bard? ")
+    answer = ask_bard(session_cookie, question)
+    print("Bard says: \{\}".format(answer))
+
+if __name__ == "__main__":
+    main()
 }
